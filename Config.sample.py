@@ -8,11 +8,11 @@ smtp_toaddrs = ["User <example@example.com>"]
 slack_webhook_url = ""
 
 # Telegram Token and ChatID for notification
-telegram_bot_token = ""
-telegram_chat_id = ""
+telegram_bot_token = "8376448352:AAHUweH-FOtF4QTENry8gDseBcFpdcLCQgw"
+telegram_chat_id = "t.me/vinted_uk_bot"
 
 # Vinted URL: change the TLD according to your country (.fr, .es, etc.)
-vinted_url = "https://www.vinted.it"
+vinted_url = "https://www.vinted.co.uk"
 
 # Vinted queries for research
 # "page", "per_page" and "order" you may not edit them
@@ -25,15 +25,15 @@ queries = [
     {
         'page': '1',
         'per_page': '96',
-        'search_text': '',
+        'search_text': 'nike running',
         'catalog_ids': '',
-        'brand_ids' : '417',
+        'brand_ids' : 'nike',
         'order': 'newest_first',
     },
     {
         'page': '1',
         'per_page': '96',
-        'search_text': 't-shirt',
+        'search_text': 'nike running division',
         'catalog_ids': '',
         'brand_ids' : '',
         'order': 'newest_first',
@@ -41,9 +41,9 @@ queries = [
     {
         'page': '1',
         'per_page': '96',
-        'search_text': '',
-        'catalog_ids': '2996',
-        'brand_ids' : '',
+        'search_text': 'nike future fast',
+        'catalog_ids': '',
+        'brand_ids' : 'nike',
         'order': 'newest_first',
     },
 
