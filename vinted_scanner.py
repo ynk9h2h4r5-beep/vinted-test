@@ -62,7 +62,7 @@ def save_analyzed_item(hash):
         sys.exit()
 
 # Send notification e-mail when a new item is found
-def send_email(item_title, item_price, item_url, item_image):
+def send_email(items):
     try:
         # Create the e-mail message
         msg = EmailMessage()
@@ -73,7 +73,7 @@ def send_email(item_title, item_price, item_url, item_image):
         msg["Message-ID"] = email.utils.make_msgid()
 
         # Format message content
-        body = f"{item_title}\n{item_price}\n🔗 {item_url}\n📷 {item_image}"
+        body = "\n".join(items)
 
         msg.set_content(body)
         
@@ -95,13 +95,29 @@ def send_email(item_title, item_price, item_url, item_image):
     except Exception as e:
         logging.error(f"Error sending email: {e}", exc_info=True)
 
+def collect_items(data):
+    items = []
+    # Process each item returned in the response
+    for item in data["items"]:
+        item_id = str(item["id"])
+        item_title = item["title"]
+        item_url = item["url"]
+        item_price = f'{item["price"]["amount"]} {item["price"]["currency_code"]}'
+        item_image = item["photo"]["full_size_url"]
+        if item_id not in list_analyzed_items:
+            items.append(f"{item_title}\n{item_price}\n🔗 {item_url}\n📷 {item_image}\n\n")
+
+            list_analyzed_items.append(item_id)
+            save_analyzed_item(item_id)
+
+    return items
 
 # Send a Slack message when a new item is found
-def send_slack_message(item_title, item_price, item_url, item_image):
+def send_slack_message(items):
     webhook_url = Config.slack_webhook_url 
 
     # Format message content
-    message = f"*{item_title}*\n🏷️ {item_price}\n🔗 {item_url}\n📷 {item_image}"
+    message = items
     slack_data = {"text": message}
 
     try:
@@ -121,10 +137,10 @@ def send_slack_message(item_title, item_price, item_url, item_image):
         logging.error(f"Error sending Slack message: {e}")
 
 # Send a Telegram message when a new item is found
-def send_telegram_message(item_title, item_price, item_url, item_image):
+def send_telegram_message(items):
 
     # Format message content
-    message = f"<b>{item_title}*</b>\n🏷️ {item_price}\n🔗 {item_url}\n📷 {item_image}"
+    message = items
 
     try:
         url = f"https://api.telegram.org/bot{Config.telegram_bot_token}/sendMessage"
@@ -155,6 +171,9 @@ def main():
     session = requests.Session()
     session.post(Config.vinted_url, headers=headers, timeout=timeoutconnection)
     cookies = session.cookies.get_dict()
+
+    # Create empty items list
+    items = []
     
     # Loop through each search query defined in Config.py
     for params in Config.queries:
@@ -164,32 +183,18 @@ def main():
         data = response.json()
 
         if data:
-            # Process each item returned in the response
-            for item in data["items"]:
-                item_id = str(item["id"])
-                item_title = item["title"]
-                item_url = item["url"]
-                item_price = f'{item["price"]["amount"]} {item["price"]["currency_code"]}'
-                item_image = item["photo"]["full_size_url"]
+            items = collect_items(data)
+            # Send e-mail notifications if configured
+            if Config.smtp_username and Config.smtp_server and items != []:
+                send_email(items)
 
-                # Check if the item has already been analyzed to prevent duplicates
-                if item_id not in list_analyzed_items:
+            # Send Slack notifications if configured
+            if Config.slack_webhook_url and items != []:
+                send_slack_message(items)
 
-                    # Send e-mail notifications if configured
-                    if Config.smtp_username and Config.smtp_server:
-                        send_email(item_title, item_price,item_url, item_image)
-
-                    # Send Slack notifications if configured
-                    if Config.slack_webhook_url:
-                        send_slack_message(item_title, item_price, item_url, item_image)
-
-                    # Send Telegram notifications if configured
-                    if Config.telegram_bot_token and Config.telegram_chat_id:
-                        send_telegram_message(item_title, item_price, item_url, item_image)
-
-                    # Mark item as analyzed and save it
-                    list_analyzed_items.append(item_id)
-                    save_analyzed_item(item_id)
+            # Send Telegram notifications if configured
+            if Config.telegram_bot_token and Config.telegram_chat_id and items != []:
+                send_telegram_message(items)
 
 if __name__ == "__main__":
     main()
