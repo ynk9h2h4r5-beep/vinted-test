@@ -48,3 +48,4 @@ queries = [
     },
 
 ]
+cp Config.sample.py Config.py
