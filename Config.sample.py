@@ -25,9 +25,9 @@ queries = [
     {
         'page': '1',
         'per_page': '96',
-        'search_text': '',
-        'catalog_ids': '',
-        'brand_ids' : '417',
+        'search_text': 'dunk',
+        'catalog_ids': 'chaussures femmes',
+        'brand_ids' : '',
         'order': 'newest_first',
     },
     {
