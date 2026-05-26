@@ -8,7 +8,7 @@ smtp_toaddrs = ["User <example@example.com>"]
 slack_webhook_url = ""
 
 # Telegram Token and ChatID for notification
-telegram_bot_token = ""
+telegram_bot_token = ${{ secrets.telegram_bot_token }}
 telegram_chat_id = ""
 
 # Vinted URL: change the TLD according to your country (.fr, .es, etc.)
